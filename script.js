@@ -16,17 +16,33 @@ function setupInputOnce() {
 
 async function hendleInput(e) {
     switch (e.key) {
-        case 'ArrowUp':
-            await moveUp()
+        case "ArrowUp":
+            if (!canMoveUp()) {
+                setupInputOnce();
+                return;
+            }
+            await moveUp();
             break;
-        case 'ArrowDown':
-            await moveDown()
+        case "ArrowDown":
+            if (!canMoveDown()) {
+                setupInputOnce();
+                return;
+            }
+            await moveDown();
             break;
-        case 'ArrowLeft':
-            await moveLeft()
+        case "ArrowLeft":
+            if (!canMoveLeft()) {
+                setupInputOnce();
+                return;
+            }
+            await moveLeft();
             break;
-        case 'ArrowRight':
-            await moveRight()
+        case "ArrowRight":
+            if (!canMoveRight()) {
+                setupInputOnce();
+                return;
+            }
+            await moveRight();
             break;
         default:
             setupInputOnce()
@@ -34,6 +50,13 @@ async function hendleInput(e) {
     }
     const newTile = new Tile(gameBoard)
     grid.getRandomEmptyCell().linkTile(newTile)
+
+    if (!canMoveUp() && !canMoveDown() && !canMoveLeft() && !canMoveRight()) {
+        await newTile.withFromAnimationEnd()
+        alert('Некуда ходить!')
+        return
+    }
+
     setupInputOnce()
 }
 
@@ -48,7 +71,7 @@ async function moveLeft() {
     await slideTiels(grid.cellsGroupedByRow)
 }
 async function moveRight() {
-    await slideTiels(grid.cellsGroupedReversedRow)
+    await slideTiels(grid.cellsGroupedByReversedRow)
 }
 
 
@@ -90,4 +113,39 @@ function slideTielsInGroup(group, promises) {
         }
         cellWithTile.unlinkTile()
     }
+}
+
+function canMoveUp() {
+    return canMove(grid.cellsGroupedByColumn);
+}
+
+function canMoveDown() {
+    return canMove(grid.cellsGroupedByReversedColumn);
+}
+
+function canMoveLeft() {
+    return canMove(grid.cellsGroupedByRow);
+}
+
+function canMoveRight() {
+    return canMove(grid.cellsGroupedByReversedRow);
+}
+
+function canMove(groupedCells) {
+    return groupedCells.some(group => canMoveInGroup(group));
+}
+
+function canMoveInGroup(group) {
+    return group.some((cell, index) => {
+        if (index === 0) {
+            return false;
+        }
+
+        if (cell.isEmpty()) {
+            return false;
+        }
+
+        const targetCell = group[index - 1];
+        return targetCell.canAccept(cell.linkedTile);
+    });
 }
