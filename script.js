@@ -20,24 +20,37 @@ function hendleInput(e) {
             moveUp()
             break;
         case 'ArrowDown':
-
+            moveDown()
             break;
-        case 'Arrowleft':
-
+        case 'ArrowLeft':
+            moveLeft()
             break;
         case 'ArrowRight':
-
+            moveRight()
             break;
         default:
             setupInputOnce()
             break;
     }
+    const newTile = new Tile(gameBoard)
+    grid.getRandomEmptyCell().linkTile(newTile)
     setupInputOnce()
 }
+
 
 function moveUp() {
     slideTiels(grid.cellsGroupedByColumn)
 }
+function moveDown() {
+    slideTiels(grid.cellsGroupedByReversedColumn)
+}
+function moveLeft() {
+    slideTiels(grid.cellsGroupedByRow)
+}
+function moveRight() {
+    slideTiels(grid.cellsGroupedReversedRow)
+}
+
 
 function slideTiels(groupedCells) {
     groupedCells.forEach(group => slideTielsInGroup(group));
@@ -48,7 +61,7 @@ function slideTiels(groupedCells) {
 }
 
 function slideTielsInGroup(group) {
-    for (let i = 0; i < group.length; i++) {
+    for (let i = 1; i < group.length; i++) {
         if (group[i].isEmpty()) {
             continue
         }
