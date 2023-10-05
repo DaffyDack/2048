@@ -14,19 +14,19 @@ function setupInputOnce() {
     window.addEventListener('keydown', hendleInput, { once: true })
 }
 
-function hendleInput(e) {
+async function hendleInput(e) {
     switch (e.key) {
         case 'ArrowUp':
-            moveUp()
+            await moveUp()
             break;
         case 'ArrowDown':
-            moveDown()
+            await moveDown()
             break;
         case 'ArrowLeft':
-            moveLeft()
+            await moveLeft()
             break;
         case 'ArrowRight':
-            moveRight()
+            await moveRight()
             break;
         default:
             setupInputOnce()
@@ -38,29 +38,31 @@ function hendleInput(e) {
 }
 
 
-function moveUp() {
-    slideTiels(grid.cellsGroupedByColumn)
+async function moveUp() {
+    await slideTiels(grid.cellsGroupedByColumn)
 }
-function moveDown() {
-    slideTiels(grid.cellsGroupedByReversedColumn)
+async function moveDown() {
+    await slideTiels(grid.cellsGroupedByReversedColumn)
 }
-function moveLeft() {
-    slideTiels(grid.cellsGroupedByRow)
+async function moveLeft() {
+    await slideTiels(grid.cellsGroupedByRow)
 }
-function moveRight() {
-    slideTiels(grid.cellsGroupedReversedRow)
+async function moveRight() {
+    await slideTiels(grid.cellsGroupedReversedRow)
 }
 
 
-function slideTiels(groupedCells) {
-    groupedCells.forEach(group => slideTielsInGroup(group));
+async function slideTiels(groupedCells) {
 
+    const promises = []
+    groupedCells.forEach(group => slideTielsInGroup(group, promises));
+    await Promise.all(promises)
     grid.cells.forEach(cell => {
         cell.hasTileForMerge() && cell.mergeTiles()
     })
 }
 
-function slideTielsInGroup(group) {
+function slideTielsInGroup(group, promises) {
     for (let i = 1; i < group.length; i++) {
         if (group[i].isEmpty()) {
             continue
@@ -78,6 +80,9 @@ function slideTielsInGroup(group) {
         if (!targetCell) {
             continue
         }
+
+        promises.push(cellWithTile.linkedTile.withFromTransitionsEnd())
+
         if (targetCell.isEmpty()) {
             targetCell.linkTile(cellWithTile.linkedTile)
         } else {
